@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nova IPTV Live TV</title>
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#090d18;color:white;font-family:Arial,sans-serif}
+header{padding:20px;background:#151f31;color:#9b8cff;font-size:24px;font-weight:bold}
+main{padding:18px;max-width:1000px;margin:auto}
+video{width:100%;background:black;border-radius:12px;max-height:480px}
+input{width:100%;padding:13px;margin:8px 0;background:#172237;color:white;border:1px solid #35415a;border-radius:8px}
+button{padding:12px 18px;background:#7968ed;color:white;border:0;border-radius:8px;cursor:pointer}
+.channel{padding:15px;margin:8px 0;background:#172237;border:1px solid #29364e;border-radius:9px;cursor:pointer}
+.channel:hover{background:#302957}
+h2{color:#a99aff}
+</style>
+</head>
+<body>
+<header>◉ NOVA IPTV</header>
+<main>
+<h2>LIVE TELEVISION</h2>
+<video id="video" controls playsinline></video>
+<h2>Playlist URL</h2>
+<input id="url" value="https://iptv-org.github.io/iptv/index.m3u">
+<button onclick="loadPlaylist()">Load Channels</button>
+<p id="status">Ready</p>
+<h2>TV Channels</h2>
+<div id="channels"></div>
+</main>
+<script>
+let list=[],hls=null;
+async function loadPlaylist(){
+const status=document.getElementById('status');
+status.textContent='Loading...';
+try{
+const r=await fetch(document.getElementById('url').value);
+if(!r.ok)throw Error('Playlist unavailable');
+const t=await r.text();
+list=[];
+let item=null;
+t.split(/\r?\n/).forEach(line=>{
+line=line.trim();
+if(line.startsWith('#EXTINF')){
+item=line.split(',').pop().trim();
+}else if(line&&!line.startsWith('#')&&item){
+list.push({name:item,url:line});item=null;
+}
+});
+render();
+status.textContent=list.length+' channels loaded';
+}catch(e){status.textContent='Error: '+e.message+' (CORS may block this playlist)';}
+}
+function render(){
+document.getElementById('channels').innerHTML='';
+list.forEach((c,i)=>{
+let el=document.createElement('div');
+el.className='channel';
+el.textContent='▶ '+c.name;
+el.onclick=()=>play(c.url);
+document.getElementById('channels').appendChild(el);
+});
+}
+function play(url){
+const v=document.getElementById('video');
+if(hls){hls.destroy();hls=null;}
+if(window.Hls&&Hls.isSupported()&&url.includes('.m3u8')){
+hls=new Hls();hls.loadSource(url);hls.attachMedia(v);
+hls.on(Hls.Events.MANIFEST_PARSED,()=>v.play());
+}else{v.src=url;v.play();}
+}
+</script>
+</body>
+</html>
