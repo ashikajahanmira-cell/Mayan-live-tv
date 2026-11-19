@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#080d19">
-<title>Nova IPTV Premium</title>
+<title>Ashika Live TV</title>
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 <style>
 *{box-sizing:border-box}
@@ -19,11 +19,12 @@ h2{font-size:19px;color:#b5aaff;margin-top:25px}
 p{color:var(--muted)}
 .player{background:#000;border-radius:14px;overflow:hidden}
 video{width:100%;max-height:480px;aspect-ratio:16/9;display:block;background:#000}
-.controls{display:grid;grid-template-columns:1fr auto;gap:9px;margin:16px 0}
+.controls{display:grid;grid-template-columns:1fr auto;gap:9px;margin:12px 0}
 input,select{min-width:0;width:100%;padding:13px;background:#141e30;border:1px solid var(--line);border-radius:9px;color:white}
 button{padding:12px 16px;background:var(--purple);color:white;border:0;border-radius:9px;font-weight:bold;cursor:pointer}
 button:disabled{opacity:.5}
 .secondary{background:#25334c}
+.green{background:#168d72}
 .filters{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
 .tabs{display:flex;gap:8px;flex-wrap:wrap;margin:15px 0}
 .tab{background:#1b2840;color:#aebbd0}
@@ -42,6 +43,7 @@ button:disabled{opacity:.5}
 .program small{color:var(--green)}
 .program strong{display:block;margin:5px 0}
 .status{font-size:12px;color:var(--green);margin:10px 0}
+.saved-row{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px}
 footer{text-align:center;padding:25px;color:var(--muted);font-size:12px}
 @media(max-width:750px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:480px){
@@ -54,17 +56,18 @@ footer{text-align:center;padding:25px;color:var(--muted);font-size:12px}
  .filters{grid-template-columns:1fr}
  .controls{grid-template-columns:1fr}
  .controls button{width:100%}
+ .saved-row{grid-template-columns:1fr}
 }
 </style>
 </head>
 <body>
 <header>
- <div class="brand">◉ NOVA IPTV</div>
+ <div class="brand">◉ ASHIKA LIVE TV</div>
  <div class="live">● LIVE TV</div>
 </header>
 
 <main>
- <h1>Premium Live TV</h1>
+ <h1>Ashika Live TV</h1>
  <p>Watch television from around the world.</p>
 
  <div class="player">
@@ -84,6 +87,27 @@ footer{text-align:center;padding:25px;color:var(--muted);font-size:12px}
   <button class="secondary" id="fileBtn">Upload M3U</button>
  </div>
  <input id="fileInput" type="file" accept=".m3u,.m3u8" hidden>
+
+ <div class="info">
+  <strong>Save your playlists</strong>
+  <p>Give your playlist a name and save its URL for later.</p>
+  <input id="playlistName" placeholder="Playlist name (e.g. My TV)">
+  <div class="controls">
+   <button class="green" id="saveBtn">＋ Save Playlist</button>
+  </div>
+  <select id="savedPlaylists">
+   <option value="">Select a saved playlist</option>
+  </select>
+  <div class="saved-row">
+   <button id="loadSavedBtn">Load Saved Playlist</button>
+   <button class="secondary" id="deleteSavedBtn">Delete Selected</button>
+  </div>
+ </div>
+
+ <div class="controls">
+  <button class="green" id="bdBtn">🇧🇩 Load Bangladesh Channels</button>
+ </div>
+
  <div class="status" id="status">Ready</div>
 
  <h2>TV Guide (EPG)</h2>
@@ -107,16 +131,20 @@ footer{text-align:center;padding:25px;color:var(--muted);font-size:12px}
  <div class="grid" id="channels"></div>
  <button id="moreBtn" class="secondary" style="display:none;margin:20px auto">Load More</button>
 </main>
-<footer>Nova IPTV Premium · Powered by your playlist</footer>
+
+<footer>Ashika Live TV · Powered by your playlist</footer>
 
 <script>
 const $=id=>document.getElementById(id);
 const DEFAULT="https://iptv-org.github.io/iptv/index.m3u";
-let channels=[],favorites=new Set(JSON.parse(localStorage.getItem("novaFav")||"[]"));
+const BD_URL="https://iptv-org.github.io/iptv/countries/bd.m3u";
+
+let channels=[];
+let favorites=new Set(JSON.parse(localStorage.getItem("ashikaFav")||"[]"));
 let current=null,hls=null,epg=[],tab="all",shown=60;
 
-function parseM3U(data){
- const lines=data.replace(/^\uFEFF/,"").split(/\r?\n/);
+function parseM3U(data,forcedCountry=""){
+ const lines=data.replace(/^\uFEFF/,"").split(/\r?\n");
  let meta=null,result=[];
  for(const line0 of lines){
   const line=line0.trim();
@@ -127,7 +155,7 @@ function parseM3U(data){
     name:(line.match(/,(.*)$/)||[])[1]?.trim()||"Unknown",
     logo:attrs["tvg-logo"]||"",
     id:attrs["tvg-id"]||"",
-    country:attrs["tvg-country"]||"",
+    country:forcedCountry||attrs["tvg-country"]||"",
     group:attrs["group-title"]||"Uncategorized"
    };
   }else if(line&&!line.startsWith("#")&&meta){
@@ -138,13 +166,14 @@ function parseM3U(data){
 }
 
 function updateFilters(){
- const countries=[...new Set(channels.map(c=>c.country).filter(Boolean))].sort();
+ const countries=[...new Set([...channels.map(c=>c.country).filter(Boolean),"Bangladesh"])].sort();
  const groups=[...new Set(channels.map(c=>c.group).filter(Boolean))].sort();
  const fill=(id,values,label)=>{
   const el=$(id),old=el.value;
   el.innerHTML=`<option value="all">All ${label}</option>`;
   values.forEach(v=>{
-   const o=document.createElement("option");o.value=v;o.textContent=v;el.appendChild(o);
+   const o=document.createElement("option");
+   o.value=v;o.textContent=v;el.appendChild(o);
   });
   if(values.includes(old))el.value=old;
  };
@@ -169,15 +198,21 @@ function render(){
   const head=document.createElement("div");head.className="channel-head";
   if(c.logo){
    const img=document.createElement("img");img.className="logo";img.src=c.logo;img.alt=c.name;
-   img.onerror=()=>{img.style.visibility="hidden"};head.appendChild(img);
+   img.onerror=()=>{img.style.visibility="hidden"};
+   head.appendChild(img);
   }else{
-   const fallback=document.createElement("div");fallback.className="logo";fallback.textContent="TV";fallback.style.display="grid";fallback.style.placeItems="center";head.appendChild(fallback);
+   const fallback=document.createElement("div");
+   fallback.className="logo";fallback.textContent="TV";
+   fallback.style.display="grid";fallback.style.placeItems="center";
+   head.appendChild(fallback);
   }
-  const star=document.createElement("button");star.className="star";star.textContent=favorites.has(c.url)?"★":"☆";
+  const star=document.createElement("button");
+  star.className="star";star.textContent=favorites.has(c.url)?"★":"☆";
   star.onclick=e=>{e.stopPropagation();toggleFavorite(c);};
   head.appendChild(star);
   const name=document.createElement("div");name.className="channel-name";name.textContent=c.name;
-  const meta=document.createElement("div");meta.className="meta";meta.textContent=[c.country,c.group].filter(Boolean).join(" · ");
+  const meta=document.createElement("div");meta.className="meta";
+  meta.textContent=[c.country,c.group].filter(Boolean).join(" · ");
   card.append(head,name,meta);
   card.onclick=()=>play(c);
   $("channels").appendChild(card);
@@ -186,8 +221,9 @@ function render(){
 }
 
 function toggleFavorite(c){
- if(favorites.has(c.url))favorites.delete(c.url);else favorites.add(c.url);
- localStorage.setItem("novaFav",JSON.stringify([...favorites]));
+ if(favorites.has(c.url))favorites.delete(c.url);
+ else favorites.add(c.url);
+ localStorage.setItem("ashikaFav",JSON.stringify([...favorites]));
  $("currentStar").textContent=current&&favorites.has(current.url)?"★":"☆";
  render();
 }
@@ -202,31 +238,101 @@ function play(c){
  if(window.Hls&&Hls.isSupported()&&/\.m3u8($|\?)/i.test(c.url)){
   hls=new Hls();hls.loadSource(c.url);hls.attachMedia(v);
   hls.on(Hls.Events.MANIFEST_PARSED,()=>v.play().catch(()=>{}));
-  hls.on(Hls.Events.ERROR,(_,d)=>{if(d.fatal)$("status").textContent="Stream unavailable or blocked.";});
- }else{v.src=c.url;v.play().catch(()=>{});}
+  hls.on(Hls.Events.ERROR,(_,d)=>{
+   if(d.fatal)$("status").textContent="Stream unavailable or blocked.";
+  });
+ }else{
+  v.src=c.url;v.play().catch(()=>{});
+ }
  showEPG(c);render();
 }
 
-async function loadPlaylist(text){
+async function loadPlaylist(data,forcedCountry=""){
  $("status").textContent="Loading playlist...";
  try{
-  let data;
-  if(text!==undefined)data=text;
-  else{
-   const r=await fetch($("playlistUrl").value.trim());
-   if(!r.ok)throw Error("HTTP "+r.status);
-   data=await r.text();
-  }
-  channels=parseM3U(data);
+  channels=parseM3U(data,forcedCountry);
   if(!channels.length)throw Error("No channels found");
   shown=60;updateFilters();render();
   $("status").textContent=channels.length+" channels loaded.";
-  localStorage.setItem("novaPlaylist",$("playlistUrl").value);
  }catch(e){
-  $("status").textContent="Could not load playlist: "+e.message+". Try uploading the M3U file if CORS blocks the URL.";
+  $("status").textContent="Could not read playlist: "+e.message;
  }
 }
 
+async function loadFromUrl(url,forcedCountry=""){
+ if(!url){$("status").textContent="Please enter a playlist URL.";return;}
+ $("status").textContent="Loading playlist...";
+ try{
+  const r=await fetch(url);
+  if(!r.ok)throw Error("HTTP "+r.status);
+  const data=await r.text();
+  await loadPlaylist(data,forcedCountry);
+  $("playlistUrl").value=url;
+  localStorage.setItem("ashikaPlaylist",url);
+ }catch(e){
+  $("status").textContent="Could not load playlist: "+e.message+". If CORS blocks the URL, try uploading an M3U file.";
+ }
+}
+
+/* Saved playlist manager */
+function getSaved(){
+ try{return JSON.parse(localStorage.getItem("ashikaSavedPlaylists")||"[]");}
+ catch(e){return [];}
+}
+
+function refreshSaved(){
+ const list=getSaved();
+ const select=$("savedPlaylists");
+ const old=select.value;
+ select.innerHTML='<option value="">Select a saved playlist</option>';
+ list.forEach((p,i)=>{
+  const option=document.createElement("option");
+  option.value=String(i);
+  option.textContent=p.name;
+  select.appendChild(option);
+ });
+ if(old!==""&&list[Number(old)])select.value=old;
+}
+
+function savePlaylist(){
+ const name=$("playlistName").value.trim();
+ const url=$("playlistUrl").value.trim();
+ if(!name){$("status").textContent="Please enter a playlist name.";return;}
+ if(!url){$("status").textContent="Please enter a playlist URL before saving.";return;}
+ const list=getSaved();
+ const existing=list.findIndex(p=>p.name.toLowerCase()===name.toLowerCase());
+ if(existing>=0){
+  list[existing]={name,url};
+ }else{
+  list.push({name,url});
+ }
+ localStorage.setItem("ashikaSavedPlaylists",JSON.stringify(list));
+ refreshSaved();
+ $("savedPlaylists").value=String(existing>=0?existing:list.length-1);
+ $("status").textContent='"'+name+'" saved successfully.';
+ $("playlistName").value="";
+}
+
+function loadSaved(){
+ const index=$("savedPlaylists").value;
+ if(index===""){ $("status").textContent="Please select a saved playlist.";return;}
+ const p=getSaved()[Number(index)];
+ if(!p)return;
+ $("playlistUrl").value=p.url;
+ loadFromUrl(p.url,p.url.includes("/countries/bd.m3u")?"Bangladesh":"");
+}
+
+function deleteSaved(){
+ const index=$("savedPlaylists").value;
+ if(index===""){ $("status").textContent="Please select a playlist to delete.";return;}
+ const list=getSaved();
+ const removed=list.splice(Number(index),1);
+ localStorage.setItem("ashikaSavedPlaylists",JSON.stringify(list));
+ refreshSaved();
+ $("status").textContent=removed.length?'"'+removed[0].name+'" deleted.':"Playlist not found.";
+}
+
+/* EPG */
 function parseXML(xml){
  const doc=new DOMParser().parseFromString(xml,"application/xml");
  if(doc.querySelector("parsererror"))throw Error("Invalid XMLTV file");
@@ -238,12 +344,14 @@ function parseXML(xml){
   desc:p.querySelector("desc")?.textContent||""
  }));
 }
+
 function xmlDate(value){
  if(!value)return null;
  const m=value.match(/^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})?/);
  if(!m)return new Date(value);
  return new Date(Date.UTC(+m[1],+m[2]-1,+m[3],+m[4],+m[5],+(m[6]||0)));
 }
+
 async function loadEPG(){
  try{
   $("epgBox").textContent="Loading TV guide...";
@@ -253,15 +361,21 @@ async function loadEPG(){
   if(!epg.length)throw Error("No programmes found");
   $("epgBox").textContent="TV guide loaded: "+epg.length+" programme entries.";
   if(current)showEPG(current);
- }catch(e){$("epgBox").textContent="EPG could not load: "+e.message+". XMLTV source must allow browser access (CORS).";}
+ }catch(e){
+  $("epgBox").textContent="EPG could not load: "+e.message+". XMLTV source must allow browser access (CORS).";
+ }
 }
+
 function showEPG(c){
  const now=new Date();
  const matches=epg.filter(p=>
   (p.id===c.id||p.id===c.name)&&xmlDate(p.stop)>now
  ).sort((a,b)=>xmlDate(a.start)-xmlDate(b.start)).slice(0,5);
  const box=$("epgBox");box.innerHTML="";
- if(!matches.length){box.textContent="No matching programme data. Load an XMLTV EPG source for this channel." ;return;}
+ if(!matches.length){
+  box.textContent="No matching programme data. Load an XMLTV EPG source for this channel.";
+  return;
+ }
  matches.forEach(p=>{
   const div=document.createElement("div");div.className="program";
   const time=document.createElement("small");
@@ -272,25 +386,41 @@ function showEPG(c){
  });
 }
 
-$("loadBtn").onclick=()=>loadPlaylist();
+/* Buttons and controls */
+$("loadBtn").onclick=()=>loadFromUrl($("playlistUrl").value.trim());
+$("bdBtn").onclick=()=>{
+ $("playlistUrl").value=BD_URL;
+ $("country").value="all";
+ loadFromUrl(BD_URL,"Bangladesh");
+};
+$("saveBtn").onclick=savePlaylist;
+$("loadSavedBtn").onclick=loadSaved;
+$("deleteSavedBtn").onclick=deleteSaved;
+
 $("fileBtn").onclick=()=>$("fileInput").click();
 $("fileInput").onchange=e=>{
  const f=e.target.files[0];if(!f)return;
- const reader=new FileReader();reader.onload=()=>loadPlaylist(reader.result);reader.readAsText(f);
+ const reader=new FileReader();
+ reader.onload=()=>loadPlaylist(reader.result);
+ reader.readAsText(f);
 };
+
 $("search").oninput=()=>{shown=60;render();};
 $("country").onchange=()=>{shown=60;render();};
 $("category").onchange=()=>{shown=60;render();};
 $("moreBtn").onclick=()=>{shown+=60;render();};
 $("currentStar").onclick=()=>{if(current)toggleFavorite(current);};
 $("epgBtn").onclick=loadEPG;
+
 document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{
  tab=b.dataset.tab;
  document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("active",x===b));
  shown=60;render();
 });
-$("playlistUrl").value=localStorage.getItem("novaPlaylist")||DEFAULT;
-loadPlaylist();
+
+refreshSaved();
+$("playlistUrl").value=localStorage.getItem("ashikaPlaylist")||DEFAULT;
+loadFromUrl($("playlistUrl").value);
 </script>
 </body>
 </html>
