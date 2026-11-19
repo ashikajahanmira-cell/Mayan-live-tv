@@ -2,75 +2,295 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Nova IPTV Live TV</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#080d19">
+<title>Nova IPTV Premium</title>
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 <style>
 *{box-sizing:border-box}
-body{margin:0;background:#090d18;color:white;font-family:Arial,sans-serif}
-header{padding:20px;background:#151f31;color:#9b8cff;font-size:24px;font-weight:bold}
-main{padding:18px;max-width:1000px;margin:auto}
-video{width:100%;background:black;border-radius:12px;max-height:480px}
-input{width:100%;padding:13px;margin:8px 0;background:#172237;color:white;border:1px solid #35415a;border-radius:8px}
-button{padding:12px 18px;background:#7968ed;color:white;border:0;border-radius:8px;cursor:pointer}
-.channel{padding:15px;margin:8px 0;background:#172237;border:1px solid #29364e;border-radius:9px;cursor:pointer}
-.channel:hover{background:#302957}
-h2{color:#a99aff}
+:root{--bg:#080d19;--card:#141e30;--line:#293750;--text:#f5f6ff;--muted:#91a0b9;--purple:#8b78ff;--green:#48dfba}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-serif}
+header{background:#111a2b;padding:17px 5%;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+.brand{font-size:23px;font-weight:bold;color:var(--purple)}
+.live{color:#ff647c;font-size:12px;font-weight:bold}
+main{max-width:1200px;margin:auto;padding:22px 4%}
+h1{font-size:30px;margin:10px 0;color:white}
+h2{font-size:19px;color:#b5aaff;margin-top:25px}
+p{color:var(--muted)}
+.player{background:#000;border-radius:14px;overflow:hidden}
+video{width:100%;max-height:480px;aspect-ratio:16/9;display:block;background:#000}
+.controls{display:grid;grid-template-columns:1fr auto;gap:9px;margin:16px 0}
+input,select{min-width:0;width:100%;padding:13px;background:#141e30;border:1px solid var(--line);border-radius:9px;color:white}
+button{padding:12px 16px;background:var(--purple);color:white;border:0;border-radius:9px;font-weight:bold;cursor:pointer}
+button:disabled{opacity:.5}
+.secondary{background:#25334c}
+.filters{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:15px 0}
+.tab{background:#1b2840;color:#aebbd0}
+.tab.active{background:var(--purple);color:white}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.channel{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:13px;cursor:pointer;min-width:0}
+.channel:hover,.channel.selected{border-color:var(--purple);background:#242344}
+.channel-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.logo{width:48px;height:48px;object-fit:contain;background:white;border-radius:9px;padding:3px}
+.channel-name{font-weight:bold;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.meta{font-size:11px;color:var(--muted);margin-top:6px}
+.star{font-size:20px;color:#ffd16d;background:none;padding:2px}
+.info{background:var(--card);border:1px solid var(--line);padding:15px;border-radius:12px;margin-top:15px}
+.program{padding:10px 0;border-bottom:1px solid var(--line)}
+.program:last-child{border:0}
+.program small{color:var(--green)}
+.program strong{display:block;margin:5px 0}
+.status{font-size:12px;color:var(--green);margin:10px 0}
+footer{text-align:center;padding:25px;color:var(--muted);font-size:12px}
+@media(max-width:750px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:480px){
+ header{padding:14px 4%}
+ main{padding:16px 3%}
+ h1{font-size:25px}
+ .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+ .channel{padding:10px}
+ .logo{width:40px;height:40px}
+ .filters{grid-template-columns:1fr}
+ .controls{grid-template-columns:1fr}
+ .controls button{width:100%}
+}
 </style>
 </head>
 <body>
-<header>◉ NOVA IPTV</header>
+<header>
+ <div class="brand">◉ NOVA IPTV</div>
+ <div class="live">● LIVE TV</div>
+</header>
+
 <main>
-<h2>LIVE TELEVISION</h2>
-<video id="video" controls playsinline></video>
-<h2>Playlist URL</h2>
-<input id="url" value="https://iptv-org.github.io/iptv/index.m3u">
-<button onclick="loadPlaylist()">Load Channels</button>
-<p id="status">Ready</p>
-<h2>TV Channels</h2>
-<div id="channels"></div>
+ <h1>Premium Live TV</h1>
+ <p>Watch television from around the world.</p>
+
+ <div class="player">
+  <video id="video" controls playsinline></video>
+ </div>
+
+ <div class="info">
+  <strong id="nowTitle">No channel selected</strong>
+  <p id="nowMeta">Choose a channel to watch</p>
+  <button class="star" id="currentStar">☆</button>
+ </div>
+
+ <h2>Playlist Manager</h2>
+ <input id="playlistUrl" value="https://iptv-org.github.io/iptv/index.m3u" placeholder="M3U playlist URL">
+ <div class="controls">
+  <button id="loadBtn">Load Playlist</button>
+  <button class="secondary" id="fileBtn">Upload M3U</button>
+ </div>
+ <input id="fileInput" type="file" accept=".m3u,.m3u8" hidden>
+ <div class="status" id="status">Ready</div>
+
+ <h2>TV Guide (EPG)</h2>
+ <input id="epgUrl" placeholder="Paste XMLTV EPG URL (optional)">
+ <div class="controls">
+  <button id="epgBtn">Load TV Guide</button>
+ </div>
+ <div class="info" id="epgBox">Select a channel to see its program guide.</div>
+
+ <h2>Explore Channels</h2>
+ <input id="search" placeholder="⌕ Search channels..." autocomplete="off">
+ <div class="filters">
+  <select id="country"><option value="all">All countries</option></select>
+  <select id="category"><option value="all">All categories</option></select>
+ </div>
+ <div class="tabs">
+  <button class="tab active" data-tab="all">All Channels</button>
+  <button class="tab" data-tab="favorites">★ Favorites</button>
+ </div>
+ <p id="count">0 channels</p>
+ <div class="grid" id="channels"></div>
+ <button id="moreBtn" class="secondary" style="display:none;margin:20px auto">Load More</button>
 </main>
+<footer>Nova IPTV Premium · Powered by your playlist</footer>
+
 <script>
-let list=[],hls=null;
-async function loadPlaylist(){
-const status=document.getElementById('status');
-status.textContent='Loading...';
-try{
-const r=await fetch(document.getElementById('url').value);
-if(!r.ok)throw Error('Playlist unavailable');
-const t=await r.text();
-list=[];
-let item=null;
-t.split(/\r?\n/).forEach(line=>{
-line=line.trim();
-if(line.startsWith('#EXTINF')){
-item=line.split(',').pop().trim();
-}else if(line&&!line.startsWith('#')&&item){
-list.push({name:item,url:line});item=null;
+const $=id=>document.getElementById(id);
+const DEFAULT="https://iptv-org.github.io/iptv/index.m3u";
+let channels=[],favorites=new Set(JSON.parse(localStorage.getItem("novaFav")||"[]"));
+let current=null,hls=null,epg=[],tab="all",shown=60;
+
+function parseM3U(data){
+ const lines=data.replace(/^\uFEFF/,"").split(/\r?\n/);
+ let meta=null,result=[];
+ for(const line0 of lines){
+  const line=line0.trim();
+  if(line.startsWith("#EXTINF")){
+   const attrs={};
+   for(const m of line.matchAll(/([\w-]+)="([^"]*)"/g))attrs[m[1].toLowerCase()]=m[2];
+   meta={
+    name:(line.match(/,(.*)$/)||[])[1]?.trim()||"Unknown",
+    logo:attrs["tvg-logo"]||"",
+    id:attrs["tvg-id"]||"",
+    country:attrs["tvg-country"]||"",
+    group:attrs["group-title"]||"Uncategorized"
+   };
+  }else if(line&&!line.startsWith("#")&&meta){
+   result.push({...meta,url:line});meta=null;
+  }
+ }
+ return result;
 }
-});
-render();
-status.textContent=list.length+' channels loaded';
-}catch(e){status.textContent='Error: '+e.message+' (CORS may block this playlist)';}
+
+function updateFilters(){
+ const countries=[...new Set(channels.map(c=>c.country).filter(Boolean))].sort();
+ const groups=[...new Set(channels.map(c=>c.group).filter(Boolean))].sort();
+ const fill=(id,values,label)=>{
+  const el=$(id),old=el.value;
+  el.innerHTML=`<option value="all">All ${label}</option>`;
+  values.forEach(v=>{
+   const o=document.createElement("option");o.value=v;o.textContent=v;el.appendChild(o);
+  });
+  if(values.includes(old))el.value=old;
+ };
+ fill("country",countries,"countries");
+ fill("category",groups,"categories");
 }
+
 function render(){
-document.getElementById('channels').innerHTML='';
-list.forEach((c,i)=>{
-let el=document.createElement('div');
-el.className='channel';
-el.textContent='▶ '+c.name;
-el.onclick=()=>play(c.url);
-document.getElementById('channels').appendChild(el);
+ const q=$("search").value.toLowerCase();
+ const country=$("country").value,category=$("category").value;
+ const data=channels.filter(c=>
+  (tab==="all"||favorites.has(c.url))&&
+  (country==="all"||c.country===country)&&
+  (category==="all"||c.group===category)&&
+  (c.name.toLowerCase().includes(q)||c.group.toLowerCase().includes(q)||c.country.toLowerCase().includes(q))
+ );
+ $("count").textContent=data.length+" channels";
+ $("channels").innerHTML="";
+ data.slice(0,shown).forEach(c=>{
+  const card=document.createElement("div");
+  card.className="channel"+(current?.url===c.url?" selected":"");
+  const head=document.createElement("div");head.className="channel-head";
+  if(c.logo){
+   const img=document.createElement("img");img.className="logo";img.src=c.logo;img.alt=c.name;
+   img.onerror=()=>{img.style.visibility="hidden"};head.appendChild(img);
+  }else{
+   const fallback=document.createElement("div");fallback.className="logo";fallback.textContent="TV";fallback.style.display="grid";fallback.style.placeItems="center";head.appendChild(fallback);
+  }
+  const star=document.createElement("button");star.className="star";star.textContent=favorites.has(c.url)?"★":"☆";
+  star.onclick=e=>{e.stopPropagation();toggleFavorite(c);};
+  head.appendChild(star);
+  const name=document.createElement("div");name.className="channel-name";name.textContent=c.name;
+  const meta=document.createElement("div");meta.className="meta";meta.textContent=[c.country,c.group].filter(Boolean).join(" · ");
+  card.append(head,name,meta);
+  card.onclick=()=>play(c);
+  $("channels").appendChild(card);
+ });
+ $("moreBtn").style.display=data.length>shown?"block":"none";
+}
+
+function toggleFavorite(c){
+ if(favorites.has(c.url))favorites.delete(c.url);else favorites.add(c.url);
+ localStorage.setItem("novaFav",JSON.stringify([...favorites]));
+ $("currentStar").textContent=current&&favorites.has(current.url)?"★":"☆";
+ render();
+}
+
+function play(c){
+ current=c;
+ $("nowTitle").textContent=c.name;
+ $("nowMeta").textContent=[c.country,c.group].filter(Boolean).join(" · ");
+ $("currentStar").textContent=favorites.has(c.url)?"★":"☆";
+ if(hls){hls.destroy();hls=null;}
+ const v=$("video");v.pause();v.removeAttribute("src");v.load();
+ if(window.Hls&&Hls.isSupported()&&/\.m3u8($|\?)/i.test(c.url)){
+  hls=new Hls();hls.loadSource(c.url);hls.attachMedia(v);
+  hls.on(Hls.Events.MANIFEST_PARSED,()=>v.play().catch(()=>{}));
+  hls.on(Hls.Events.ERROR,(_,d)=>{if(d.fatal)$("status").textContent="Stream unavailable or blocked.";});
+ }else{v.src=c.url;v.play().catch(()=>{});}
+ showEPG(c);render();
+}
+
+async function loadPlaylist(text){
+ $("status").textContent="Loading playlist...";
+ try{
+  let data;
+  if(text!==undefined)data=text;
+  else{
+   const r=await fetch($("playlistUrl").value.trim());
+   if(!r.ok)throw Error("HTTP "+r.status);
+   data=await r.text();
+  }
+  channels=parseM3U(data);
+  if(!channels.length)throw Error("No channels found");
+  shown=60;updateFilters();render();
+  $("status").textContent=channels.length+" channels loaded.";
+  localStorage.setItem("novaPlaylist",$("playlistUrl").value);
+ }catch(e){
+  $("status").textContent="Could not load playlist: "+e.message+". Try uploading the M3U file if CORS blocks the URL.";
+ }
+}
+
+function parseXML(xml){
+ const doc=new DOMParser().parseFromString(xml,"application/xml");
+ if(doc.querySelector("parsererror"))throw Error("Invalid XMLTV file");
+ return [...doc.querySelectorAll("programme")].map(p=>({
+  id:p.getAttribute("channel"),
+  start:p.getAttribute("start"),
+  stop:p.getAttribute("stop"),
+  title:p.querySelector("title")?.textContent||"Untitled",
+  desc:p.querySelector("desc")?.textContent||""
+ }));
+}
+function xmlDate(value){
+ if(!value)return null;
+ const m=value.match(/^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})?/);
+ if(!m)return new Date(value);
+ return new Date(Date.UTC(+m[1],+m[2]-1,+m[3],+m[4],+m[5],+(m[6]||0)));
+}
+async function loadEPG(){
+ try{
+  $("epgBox").textContent="Loading TV guide...";
+  const r=await fetch($("epgUrl").value.trim());
+  if(!r.ok)throw Error("HTTP "+r.status);
+  epg=parseXML(await r.text());
+  if(!epg.length)throw Error("No programmes found");
+  $("epgBox").textContent="TV guide loaded: "+epg.length+" programme entries.";
+  if(current)showEPG(current);
+ }catch(e){$("epgBox").textContent="EPG could not load: "+e.message+". XMLTV source must allow browser access (CORS).";}
+}
+function showEPG(c){
+ const now=new Date();
+ const matches=epg.filter(p=>
+  (p.id===c.id||p.id===c.name)&&xmlDate(p.stop)>now
+ ).sort((a,b)=>xmlDate(a.start)-xmlDate(b.start)).slice(0,5);
+ const box=$("epgBox");box.innerHTML="";
+ if(!matches.length){box.textContent="No matching programme data. Load an XMLTV EPG source for this channel." ;return;}
+ matches.forEach(p=>{
+  const div=document.createElement("div");div.className="program";
+  const time=document.createElement("small");
+  time.textContent=xmlDate(p.start)?.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})||"";
+  const title=document.createElement("strong");title.textContent=p.title;
+  const desc=document.createElement("div");desc.className="meta";desc.textContent=p.desc;
+  div.append(time,title,desc);box.appendChild(div);
+ });
+}
+
+$("loadBtn").onclick=()=>loadPlaylist();
+$("fileBtn").onclick=()=>$("fileInput").click();
+$("fileInput").onchange=e=>{
+ const f=e.target.files[0];if(!f)return;
+ const reader=new FileReader();reader.onload=()=>loadPlaylist(reader.result);reader.readAsText(f);
+};
+$("search").oninput=()=>{shown=60;render();};
+$("country").onchange=()=>{shown=60;render();};
+$("category").onchange=()=>{shown=60;render();};
+$("moreBtn").onclick=()=>{shown+=60;render();};
+$("currentStar").onclick=()=>{if(current)toggleFavorite(current);};
+$("epgBtn").onclick=loadEPG;
+document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{
+ tab=b.dataset.tab;
+ document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("active",x===b));
+ shown=60;render();
 });
-}
-function play(url){
-const v=document.getElementById('video');
-if(hls){hls.destroy();hls=null;}
-if(window.Hls&&Hls.isSupported()&&url.includes('.m3u8')){
-hls=new Hls();hls.loadSource(url);hls.attachMedia(v);
-hls.on(Hls.Events.MANIFEST_PARSED,()=>v.play());
-}else{v.src=url;v.play();}
-}
+$("playlistUrl").value=localStorage.getItem("novaPlaylist")||DEFAULT;
+loadPlaylist();
 </script>
 </body>
 </html>
