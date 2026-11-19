@@ -2,51 +2,295 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#080d19">
 <title>Ashika Live TV</title>
+
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
 <style>
 *{box-sizing:border-box}
-:root{--bg:#080d19;--card:#141e30;--line:#293750;--text:#f5f6ff;--muted:#91a0b9;--purple:#8b78ff;--green:#48dfba}
-body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-serif}
-header{background:#111a2b;padding:16px 5%;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
-.brand{font-size:22px;font-weight:bold;color:var(--purple)}
-.live{color:#ff647c;font-size:12px;font-weight:bold}
-main{max-width:1200px;margin:auto;padding:22px 4%}
+
+:root{
+ --bg:#080d19;
+ --card:#141e30;
+ --line:#293750;
+ --text:#f5f6ff;
+ --muted:#91a0b9;
+ --purple:#8b78ff;
+ --green:#48dfba;
+}
+
+body{
+ margin:0;
+ background:var(--bg);
+ color:var(--text);
+ font-family:Arial,sans-serif;
+}
+
+header{
+ background:#111a2b;
+ padding:16px 5%;
+ display:flex;
+ justify-content:space-between;
+ align-items:center;
+ border-bottom:1px solid var(--line);
+ position:sticky;
+ top:0;
+ z-index:5;
+}
+
+.brand{
+ font-size:22px;
+ font-weight:bold;
+ color:var(--purple);
+}
+
+.live{
+ color:#ff647c;
+ font-size:12px;
+ font-weight:bold;
+}
+
+main{
+ max-width:1200px;
+ margin:auto;
+ padding:22px 4%;
+}
+
 h1{font-size:29px;margin:10px 0}
 h2{font-size:19px;color:#b5aaff;margin-top:25px}
 p{color:var(--muted);line-height:1.5}
-input,select{width:100%;min-width:0;padding:13px;background:var(--card);border:1px solid var(--line);border-radius:9px;color:white;font-size:14px}
-button{padding:13px 15px;background:var(--purple);color:white;border:0;border-radius:9px;font-weight:bold;cursor:pointer;font-size:14px}
+
+input,select{
+ width:100%;
+ min-width:0;
+ padding:13px;
+ background:var(--card);
+ border:1px solid var(--line);
+ border-radius:9px;
+ color:white;
+ font-size:14px;
+}
+
+button{
+ padding:13px 15px;
+ background:var(--purple);
+ color:white;
+ border:0;
+ border-radius:9px;
+ font-weight:bold;
+ cursor:pointer;
+ font-size:14px;
+}
+
 button:disabled{opacity:.5}
 .secondary{background:#25334c}
 .green{background:#168d72}
-.controls{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:12px 0}
-.player{background:#000;border-radius:13px;overflow:hidden}
-video{width:100%;aspect-ratio:16/9;max-height:480px;display:block;background:#000}
-.info{background:var(--card);border:1px solid var(--line);padding:15px;border-radius:12px;margin-top:14px}
-.status{font-size:13px;color:var(--green);margin:12px 0;overflow-wrap:anywhere}
+.red{background:#d93650}
+
+.controls{
+ display:grid;
+ grid-template-columns:1fr 1fr;
+ gap:9px;
+ margin:12px 0;
+}
+
+.info{
+ background:var(--card);
+ border:1px solid var(--line);
+ padding:15px;
+ border-radius:12px;
+ margin-top:14px;
+}
+
+.status{
+ font-size:13px;
+ color:var(--green);
+ margin:12px 0;
+ overflow-wrap:anywhere;
+}
+
 .status.error{color:#ff8192}
-.filters{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
-.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:15px 0}
+
+.filters{
+ display:grid;
+ grid-template-columns:1fr 1fr;
+ gap:10px;
+ margin:12px 0;
+}
+
+.tabs{
+ display:flex;
+ gap:8px;
+ flex-wrap:wrap;
+ margin:15px 0;
+}
+
 .tab{background:#1b2840;color:#aebbd0}
 .tab.active{background:var(--purple);color:white}
-.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
-.channel{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;cursor:pointer;min-width:0}
-.channel.selected,.channel:hover{border-color:var(--purple);background:#242344}
-.channel-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
-.logo{width:46px;height:46px;object-fit:contain;background:white;border-radius:8px;padding:3px}
-.channel-name{font-weight:bold;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.meta{font-size:11px;color:var(--muted);margin-top:6px}
-.star{font-size:20px;color:#ffd16d;background:none;padding:2px}
-.saved-box{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:15px;margin-top:15px}
+
+.grid{
+ display:grid;
+ grid-template-columns:repeat(4,minmax(0,1fr));
+ gap:12px;
+}
+
+.channel{
+ background:var(--card);
+ border:1px solid var(--line);
+ border-radius:12px;
+ padding:12px;
+ cursor:pointer;
+ min-width:0;
+}
+
+.channel.selected,.channel:hover{
+ border-color:var(--purple);
+ background:#242344;
+}
+
+.channel-head{
+ display:flex;
+ justify-content:space-between;
+ align-items:center;
+ margin-bottom:10px;
+}
+
+.logo{
+ width:46px;
+ height:46px;
+ object-fit:contain;
+ background:white;
+ border-radius:8px;
+ padding:3px;
+}
+
+.channel-name{
+ font-weight:bold;
+ font-size:13px;
+ white-space:nowrap;
+ overflow:hidden;
+ text-overflow:ellipsis;
+}
+
+.meta{
+ font-size:11px;
+ color:var(--muted);
+ margin-top:6px;
+}
+
+.star{
+ font-size:20px;
+ color:#ffd16d;
+ background:none;
+ padding:2px;
+}
+
+.saved-box{
+ background:var(--card);
+ border:1px solid var(--line);
+ border-radius:12px;
+ padding:15px;
+ margin-top:15px;
+}
+
 .saved-box input,.saved-box select{margin:7px 0}
-.program{padding:10px 0;border-bottom:1px solid var(--line)}
+
+.program{
+ padding:10px 0;
+ border-bottom:1px solid var(--line);
+}
+
 .program small{color:var(--green)}
 .program strong{display:block;margin:5px 0}
-footer{text-align:center;padding:25px;color:var(--muted);font-size:12px}
-@media(max-width:750px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+
+footer{
+ text-align:center;
+ padding:25px;
+ color:var(--muted);
+ font-size:12px;
+}
+
+/* POPUP PLAYER */
+
+.popup-overlay{
+ display:none;
+ position:fixed;
+ inset:0;
+ z-index:9999;
+ background:rgba(0,0,0,.92);
+ align-items:center;
+ justify-content:center;
+ padding:15px;
+}
+
+.popup-overlay.show{display:flex}
+
+.popup-window{
+ width:100%;
+ max-width:950px;
+ background:#111a2b;
+ border:1px solid var(--line);
+ border-radius:14px;
+ overflow:hidden;
+ box-shadow:0 15px 60px #000;
+}
+
+.popup-header{
+ display:flex;
+ justify-content:space-between;
+ align-items:center;
+ padding:13px 15px;
+ gap:10px;
+}
+
+.popup-title{
+ font-weight:bold;
+ overflow:hidden;
+ text-overflow:ellipsis;
+ white-space:nowrap;
+}
+
+.popup-close{
+ background:#d93650;
+ padding:10px 15px;
+}
+
+.popup-video{
+ background:#000;
+ width:100%;
+}
+
+.popup-video video{
+ width:100%;
+ aspect-ratio:16/9;
+ max-height:75vh;
+ display:block;
+ object-fit:contain;
+ background:#000;
+}
+
+.popup-controls{
+ display:flex;
+ justify-content:space-between;
+ align-items:center;
+ gap:10px;
+ padding:12px;
+}
+
+.fullscreen-btn{background:#168d72}
+
+.popup-status{
+ color:var(--muted);
+ font-size:12px;
+ padding:0 12px 10px;
+}
+
+@media(max-width:750px){
+ .grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+
 @media(max-width:480px){
  header{padding:14px 4%}
  main{padding:16px 3%}
@@ -55,9 +299,13 @@ footer{text-align:center;padding:25px;color:var(--muted);font-size:12px}
  .channel{padding:9px}
  .logo{width:40px;height:40px}
  .filters,.controls{grid-template-columns:1fr}
+ .popup-overlay{padding:7px}
+ .popup-window{border-radius:10px}
+ .popup-video video{max-height:65vh}
 }
 </style>
 </head>
+
 <body>
 
 <header>
@@ -66,12 +314,9 @@ footer{text-align:center;padding:25px;color:var(--muted);font-size:12px}
 </header>
 
 <main>
-<h1>Ashika Live TV</h1>
-<p>Watch television from around the world.</p>
 
-<div class="player">
- <video id="video" controls playsinline></video>
-</div>
+<h1>Ashika Live TV</h1>
+<p>Watch your favorite television channels.</p>
 
 <div class="info">
  <strong id="nowTitle">No channel selected</strong>
@@ -79,50 +324,77 @@ footer{text-align:center;padding:25px;color:var(--muted);font-size:12px}
  <button class="star" id="currentStar">☆</button>
 </div>
 
+<h2>Quick Playlists</h2>
+
+<div class="controls">
+ <button class="green" id="bdBtn">🇧🇩 Bangladesh</button>
+ <button id="indiaAllBtn">🇮🇳 India All</button>
+ <button class="secondary" id="indiaEntertainmentBtn">
+  🇮🇳 Indian Entertainment
+ </button>
+ <button class="secondary" id="indiaSportsBtn">
+  🇮🇳 Indian Sports
+ </button>
+</div>
+
 <h2>Playlist Manager</h2>
-<input id="playlistUrl" value="https://iptv-org.github.io/iptv/index.m3u" placeholder="Paste M3U URL">
+
+<input id="playlistUrl"
+ value="https://iptv-org.github.io/iptv/index.m3u"
+ placeholder="Paste M3U URL">
 
 <div class="controls">
  <button id="loadBtn">Load Playlist</button>
  <button class="secondary" id="fileBtn">Upload M3U File</button>
 </div>
+
 <input type="file" id="fileInput" accept=".m3u,.m3u8" hidden>
 
 <div class="saved-box">
  <strong>Save Your Playlists</strong>
  <p>Save multiple playlist links for later.</p>
+
  <input id="playlistName" placeholder="Enter playlist name">
- <button class="green" id="saveBtn" style="width:100%">＋ Save Playlist</button>
+
+ <button class="green" id="saveBtn" style="width:100%">
+  ＋ Save Playlist
+ </button>
+
  <select id="savedPlaylists">
   <option value="">Select a saved playlist</option>
  </select>
+
  <div class="controls">
   <button id="loadSavedBtn">Load Saved</button>
   <button class="secondary" id="deleteSavedBtn">Delete</button>
  </div>
 </div>
 
-<div class="controls">
- <button class="green" id="bdBtn">🇧🇩 Bangladesh Channels</button>
+<div id="status" class="status">
+ Website ready. Press Load Playlist.
 </div>
 
-<div id="status" class="status">Website ready. Press Load Playlist.</div>
-
 <h2>TV Guide (EPG)</h2>
+
 <input id="epgUrl" placeholder="XMLTV EPG URL (optional)">
+
 <div class="controls">
  <button id="epgBtn">Load TV Guide</button>
 </div>
-<div class="info" id="epgBox">Select a channel to see its program guide.</div>
+
+<div class="info" id="epgBox">
+ Select a channel to see its program guide.
+</div>
 
 <h2>Explore Channels</h2>
+
 <input id="search" placeholder="⌕ Search channels...">
 
 <div class="filters">
  <select id="country">
   <option value="all">All countries</option>
-  <option value="Bangladesh">Bangladesh</option>
  </select>
+
  <select id="category">
   <option value="all">All categories</option>
  </select>
@@ -134,20 +406,74 @@ footer{text-align:center;padding:25px;color:var(--muted);font-size:12px}
 </div>
 
 <p id="count">0 channels</p>
+
 <div class="grid" id="channels"></div>
-<button id="moreBtn" class="secondary" style="display:none;margin:20px auto">Load More</button>
+
+<button id="moreBtn" class="secondary"
+ style="display:none;margin:20px auto">
+ Load More
+</button>
+
 </main>
 
 <footer>Ashika Live TV · Your Entertainment</footer>
+
+<!-- POPUP VIDEO PLAYER -->
+
+<div class="popup-overlay" id="popupPlayer">
+
+ <div class="popup-window">
+
+  <div class="popup-header">
+   <div class="popup-title" id="popupTitle">
+    ASHIKA LIVE TV
+   </div>
+
+   <button class="popup-close" id="closePlayer">
+    ✕ Close
+   </button>
+  </div>
+
+  <div class="popup-video" id="popupVideoBox">
+   <video id="video" controls playsinline
+    webkit-playsinline></video>
+  </div>
+
+  <div class="popup-controls">
+   <span class="popup-status" id="playerStatus">
+    Ready to play
+   </span>
+
+   <button class="fullscreen-btn" id="fullscreenBtn">
+    ⛶ Full Screen
+   </button>
+  </div>
+
+ </div>
+</div>
 
 <script>
 "use strict";
 
 const $ = id => document.getElementById(id);
 
-const DEFAULT_URL = "https://iptv-org.github.io/iptv/index.m3u";
-const BD_URL = "https://iptv-org.github.io/iptv/countries/bd.m3u";
-const RAW_BD_URL = "https://raw.githubusercontent.com/iptv-org/iptv/master/streams/bd.m3u";
+const DEFAULT_URL =
+ "https://iptv-org.github.io/iptv/index.m3u";
+
+const BD_URL =
+ "https://iptv-org.github.io/iptv/countries/bd.m3u";
+
+const INDIA_URL =
+ "https://iptv-org.github.io/iptv/countries/in.m3u";
+
+const INDIA_SPORTS_URL =
+ "https://iptv-org.github.io/iptv/categories/sports.m3u";
+
+const INDIA_ENTERTAINMENT_URL =
+ "https://iptv-org.github.io/iptv/categories/entertainment.m3u";
+
+const RAW_BD_URL =
+ "https://raw.githubusercontent.com/iptv-org/iptv/master/streams/bd.m3u";
 
 let channels = [];
 let current = null;
@@ -157,52 +483,79 @@ let tab = "all";
 let shown = 60;
 let favorites = new Set();
 
+let indiaMode = "";
+
 try {
- favorites = new Set(JSON.parse(localStorage.getItem("ashikaFav") || "[]"));
+ favorites = new Set(
+  JSON.parse(localStorage.getItem("ashikaFav") || "[]")
+ );
 } catch(e) {}
 
-function status(message,error=false) {
+/* STATUS */
+
+function status(message,error=false){
  $("status").textContent = message;
- $("status").className = error ? "status error" : "status";
+ $("status").className =
+  error ? "status error" : "status";
 }
 
-function normalizeCountry(value) {
+/* COUNTRY */
+
+function normalizeCountry(value){
  const v = (value || "").trim();
- if (/^(bd|bgd|bangladesh)$/i.test(v)) return "Bangladesh";
+
+ if(/^(bd|bgd|bangladesh)$/i.test(v))
+  return "Bangladesh";
+
+ if(/^(in|ind|india)$/i.test(v))
+  return "India";
+
  return v;
 }
 
-function parseM3U(data,forcedCountry="") {
+/* PARSE M3U */
+
+function parseM3U(data,forcedCountry=""){
  const lines = data.replace(/^\uFEFF/,"").split(/\r?\n/);
+
  let meta = null;
  const result = [];
 
- for(const raw of lines) {
+ for(const raw of lines){
   const line = raw.trim();
 
-  if(line.startsWith("#EXTINF")) {
+  if(line.startsWith("#EXTINF")){
    const attrs = {};
+
    const re = /([\w-]+)="([^"]*)"/g;
    let m;
-   while((m=re.exec(line))!==null) {
+
+   while((m=re.exec(line))!==null){
     attrs[m[1].toLowerCase()] = m[2];
    }
 
    const comma = line.lastIndexOf(",");
-   const name = comma >= 0 ? line.slice(comma+1).trim() : "Unknown";
+
+   const name = comma >= 0
+    ? line.slice(comma+1).trim()
+    : "Unknown";
 
    meta = {
-    name: name || "Unknown",
-    logo: attrs["tvg-logo"] || "",
-    id: attrs["tvg-id"] || "",
-    country: normalizeCountry(forcedCountry || attrs["tvg-country"] || ""),
-    group: attrs["group-title"] || "Uncategorized"
+    name:name || "Unknown",
+    logo:attrs["tvg-logo"] || "",
+    id:attrs["tvg-id"] || "",
+    country:normalizeCountry(
+     forcedCountry || attrs["tvg-country"] || ""
+    ),
+    group:attrs["group-title"] || "Uncategorized"
    };
   }
-  else if(line && !line.startsWith("#") && meta) {
-   if(/^https?:\/\//i.test(line)) {
+
+  else if(line && !line.startsWith("#") && meta){
+   if(/^https?:\/\//i.test(line)){
     result.push({...meta,url:line});
    }
+
    meta = null;
   }
  }
@@ -210,26 +563,18 @@ function parseM3U(data,forcedCountry="") {
  return result;
 }
 
-function updateFilters() {
- const countries = [...new Set([
-  "Bangladesh",
-  ...channels.map(c=>c.country).filter(Boolean)
- ])].sort();
+/* FILTERS */
 
- const groups = [...new Set(channels.map(c=>c.group).filter(Boolean))].sort();
-
- fillSelect("country",countries,"All countries");
- fillSelect("category",groups,"All categories");
-}
-
-function fillSelect(id,values,firstLabel) {
+function fillSelect(id,values,firstLabel){
  const el = $(id);
  const old = el.value;
+
  el.innerHTML = "";
 
  const first = document.createElement("option");
  first.value = "all";
  first.textContent = firstLabel;
+
  el.appendChild(first);
 
  values.forEach(value=>{
@@ -239,29 +584,68 @@ function fillSelect(id,values,firstLabel) {
   el.appendChild(option);
  });
 
- if(values.includes(old)) el.value = old;
+ if(values.includes(old)){
+  el.value = old;
+ }
 }
 
-function render() {
+function updateFilters(){
+ const countries = [
+  ...new Set(channels.map(c=>c.country).filter(Boolean))
+ ].sort();
+
+ const groups = [
+  ...new Set(channels.map(c=>c.group).filter(Boolean))
+ ].sort();
+
+ fillSelect("country",countries,"All countries");
+ fillSelect("category",groups,"All categories");
+}
+
+/* RENDER */
+
+function render(){
  const q = $("search").value.toLowerCase().trim();
  const country = $("country").value;
  const category = $("category").value;
 
- const data = channels.filter(c=>{
-  const text = (c.name+" "+c.group+" "+c.country).toLowerCase();
+ let data = channels.filter(c=>{
+  const text = (
+   c.name+" "+c.group+" "+c.country
+  ).toLowerCase();
 
-  return (tab==="all" || favorites.has(c.url)) &&
+  return (
+   (tab==="all" || favorites.has(c.url)) &&
    (country==="all" || c.country===country) &&
    (category==="all" || c.group===category) &&
-   text.includes(q);
+   text.includes(q)
+  );
  });
+
+ if(indiaMode){
+  data = data.filter(c=>{
+   if(c.country !== "India") return false;
+
+   if(indiaMode==="sports"){
+    return /sport|cricket|football/i.test(c.group);
+   }
+
+   if(indiaMode==="entertainment"){
+    return /entertainment|movie|music|series/i.test(c.group);
+   }
+
+   return true;
+  });
+ }
 
  $("count").textContent = data.length+" channels";
  $("channels").innerHTML = "";
 
  data.slice(0,shown).forEach(c=>{
   const card = document.createElement("div");
-  card.className = "channel"+(current?.url===c.url?" selected":"");
+
+  card.className =
+   "channel"+(current?.url===c.url?" selected":"");
 
   const head = document.createElement("div");
   head.className = "channel-head";
@@ -270,10 +654,14 @@ function render() {
   img.className = "logo";
   img.alt = c.name;
   img.src = c.logo || "";
-  img.onerror = ()=>{img.style.display="none"};
 
-  if(c.logo) head.appendChild(img);
-  else {
+  img.onerror = ()=>{
+   img.style.display = "none";
+  };
+
+  if(c.logo){
+   head.appendChild(img);
+  }else{
    const fallback = document.createElement("div");
    fallback.className = "logo";
    fallback.textContent = "TV";
@@ -284,11 +672,14 @@ function render() {
 
   const star = document.createElement("button");
   star.className = "star";
-  star.textContent = favorites.has(c.url)?"★":"☆";
+  star.textContent =
+   favorites.has(c.url) ? "★" : "☆";
+
   star.onclick = e=>{
    e.stopPropagation();
    toggleFavorite(c);
   };
+
   head.appendChild(star);
 
   const name = document.createElement("div");
@@ -297,34 +688,61 @@ function render() {
 
   const meta = document.createElement("div");
   meta.className = "meta";
-  meta.textContent = [c.country,c.group].filter(Boolean).join(" · ");
+  meta.textContent =
+   [c.country,c.group].filter(Boolean).join(" · ");
 
   card.append(head,name,meta);
+
   card.onclick = ()=>play(c);
+
   $("channels").appendChild(card);
  });
 
- $("moreBtn").style.display = data.length>shown ? "block":"none";
+ $("moreBtn").style.display =
+  data.length>shown ? "block" : "none";
 }
 
-function toggleFavorite(c) {
- if(favorites.has(c.url)) favorites.delete(c.url);
- else favorites.add(c.url);
+/* FAVORITES */
 
- localStorage.setItem("ashikaFav",JSON.stringify([...favorites]));
- $("currentStar").textContent = current && favorites.has(current.url)?"★":"☆";
+function toggleFavorite(c){
+ if(favorites.has(c.url)){
+  favorites.delete(c.url);
+ }else{
+  favorites.add(c.url);
+ }
+
+ localStorage.setItem(
+  "ashikaFav",
+  JSON.stringify([...favorites])
+ );
+
+ $("currentStar").textContent =
+  current && favorites.has(current.url) ? "★" : "☆";
+
  render();
 }
 
-function play(c) {
+/* POPUP PLAYER */
+
+function play(c){
  current = c;
+
  $("nowTitle").textContent = c.name;
- $("nowMeta").textContent = [c.country,c.group].filter(Boolean).join(" · ");
- $("currentStar").textContent = favorites.has(c.url)?"★":"☆";
+
+ $("nowMeta").textContent =
+  [c.country,c.group].filter(Boolean).join(" · ");
+
+ $("currentStar").textContent =
+  favorites.has(c.url) ? "★" : "☆";
+
+ $("popupTitle").textContent = c.name;
+ $("playerStatus").textContent = "Loading stream...";
+
+ $("popupPlayer").classList.add("show");
 
  const video = $("video");
 
- if(hls) {
+ if(hls){
   hls.destroy();
   hls = null;
  }
@@ -333,47 +751,149 @@ function play(c) {
  video.removeAttribute("src");
  video.load();
 
- if(window.Hls && Hls.isSupported() && /\.m3u8($|\?)/i.test(c.url)) {
+ if(window.Hls && Hls.isSupported() &&
+    /\.m3u8($|\?)/i.test(c.url)){
+
   hls = new Hls();
+
   hls.loadSource(c.url);
   hls.attachMedia(video);
 
   hls.on(Hls.Events.MANIFEST_PARSED,()=>{
-   video.play().catch(()=>{});
+   video.play().then(()=>{
+    $("playerStatus").textContent = "● LIVE";
+   }).catch(()=>{
+    $("playerStatus").textContent =
+     "Press Play to start video";
+   });
   });
 
   hls.on(Hls.Events.ERROR,(_,data)=>{
-   if(data.fatal) status("Video stream unavailable. Try another channel.",true);
+   if(data.fatal){
+    $("playerStatus").textContent =
+     "Stream unavailable. Try another channel.";
+
+    status(
+     "Video stream unavailable. Try another channel.",
+     true
+    );
+   }
   });
- } else {
+
+ }else if(video.canPlayType("application/vnd.apple.mpegurl")){
   video.src = c.url;
-  video.play().catch(()=>{});
+
+  video.play().then(()=>{
+   $("playerStatus").textContent = "● LIVE";
+  }).catch(()=>{
+   $("playerStatus").textContent =
+    "Press Play to start video";
+  });
+
+ }else{
+  video.src = c.url;
+
+  video.play().then(()=>{
+   $("playerStatus").textContent = "● LIVE";
+  }).catch(()=>{
+   $("playerStatus").textContent =
+    "Press Play to start video";
+  });
  }
 
  showEPG(c);
  render();
 }
 
-async function fetchText(url) {
+/* CLOSE PLAYER */
+
+function closePopupPlayer(){
+ const video = $("video");
+
+ if(document.fullscreenElement){
+  document.exitFullscreen().catch(()=>{});
+ }
+
+ video.pause();
+ video.removeAttribute("src");
+ video.load();
+
+ if(hls){
+  hls.destroy();
+  hls = null;
+ }
+
+ $("popupPlayer").classList.remove("show");
+ $("playerStatus").textContent = "Ready to play";
+}
+
+$("closePlayer").addEventListener(
+ "click",
+ closePopupPlayer
+);
+
+$("popupPlayer").addEventListener("click",e=>{
+ if(e.target === $("popupPlayer")){
+  closePopupPlayer();
+ }
+});
+
+/* FULL SCREEN */
+
+$("fullscreenBtn").addEventListener("click",async()=>{
+ const box = $("popupVideoBox");
+ const video = $("video");
+
+ try{
+  if(document.fullscreenElement){
+   await document.exitFullscreen();
+  }else if(box.requestFullscreen){
+   await box.requestFullscreen();
+  }else if(video.webkitEnterFullscreen){
+   video.webkitEnterFullscreen();
+  }else{
+   status("Fullscreen is not supported.",true);
+  }
+ }catch(e){
+  status("Could not open fullscreen mode.",true);
+ }
+});
+
+document.addEventListener("keydown",e=>{
+ if(e.key==="Escape" &&
+    $("popupPlayer").classList.contains("show")){
+  closePopupPlayer();
+ }
+});
+
+/* FETCH PLAYLIST */
+
+async function fetchText(url){
  const attempts = [
   url,
-  "https://api.allorigins.win/raw?url="+encodeURIComponent(url)
+  "https://api.allorigins.win/raw?url="+
+  encodeURIComponent(url)
  ];
 
  let lastError = null;
 
- for(const address of attempts) {
-  try {
+ for(const address of attempts){
+  try{
    const response = await fetch(address);
 
-   if(!response.ok) throw new Error("HTTP "+response.status);
+   if(!response.ok){
+    throw new Error("HTTP "+response.status);
+   }
 
    const text = await response.text();
 
-   if(!text.trim()) throw new Error("Empty playlist");
+   if(!text.trim()){
+    throw new Error("Empty playlist");
+   }
 
    return text;
-  } catch(e) {
+
+  }catch(e){
    lastError = e;
   }
  }
@@ -381,102 +901,137 @@ async function fetchText(url) {
  throw lastError || new Error("Could not fetch playlist");
 }
 
-async function loadFromUrl(url,forcedCountry="") {
- if(!url) {
+/* LOAD PLAYLIST */
+
+async function loadFromUrl(url,forcedCountry=""){
+ if(!url){
   status("Please enter a playlist URL.",true);
   return;
  }
 
  status("Loading playlist...");
 
- try {
+ try{
   const data = await fetchText(url);
   const result = parseM3U(data,forcedCountry);
 
-  if(!result.length) {
-   throw new Error("No valid channel entries found in this playlist.");
+  if(!result.length){
+   throw new Error("No valid channel entries found.");
   }
 
   channels = result;
   shown = 60;
   current = null;
+  indiaMode = "";
+
+  closePopupPlayer();
 
   $("nowTitle").textContent = "No channel selected";
   $("nowMeta").textContent = "Choose a channel to watch";
+
+  $("search").value = "";
+  $("country").value = "all";
+  $("category").value = "all";
 
   updateFilters();
   render();
 
   $("playlistUrl").value = url;
+
   localStorage.setItem("ashikaPlaylist",url);
 
   status("Success! "+channels.length+" channels loaded.");
- } catch(e) {
-  channels = [];
-  updateFilters();
-  render();
+
+ }catch(e){
   status("Loading failed: "+e.message,true);
  }
 }
 
-function loadBangladesh() {
- $("playlistUrl").value = BD_URL;
- loadBangladeshTry(BD_URL);
-}
+/* QUICK PLAYLISTS */
 
-async function loadBangladeshTry(url) {
- status("Loading Bangladesh channels...");
+async function loadQuickPlaylist(url,name,forcedCountry="",mode=""){
+ $("playlistUrl").value = url;
 
- try {
-  let data;
+ status("Loading "+name+"...");
 
-  try {
-   data = await fetchText(url);
-  } catch(e) {
-   data = await fetchText(RAW_BD_URL);
+ try{
+  const data = await fetchText(url);
+
+  let result = parseM3U(data,forcedCountry);
+
+  if(!result.length){
+   throw new Error("No channels found.");
   }
 
-  let result = parseM3U(data,"Bangladesh");
-
-  if(!result.length) throw new Error("No Bangladesh channels found.");
+  if(mode==="india"){
+   result = result.filter(c=>c.country==="India");
+  }
 
   channels = result;
   shown = 60;
   current = null;
+  indiaMode = "";
 
-  updateFilters();
-  $("country").value = "Bangladesh";
-  $("search").value = "";
+  closePopupPlayer();
+
   tab = "all";
+
+  $("search").value = "";
+  $("country").value = "all";
+  $("category").value = "all";
 
   document.querySelectorAll(".tab").forEach(b=>{
    b.classList.toggle("active",b.dataset.tab==="all");
   });
 
+  updateFilters();
+
+  if(forcedCountry){
+   $("country").value = forcedCountry;
+  }
+
+  if(mode==="sports" || mode==="entertainment"){
+   indiaMode = mode;
+   $("country").value = "India";
+  }
+
   render();
-  $("playlistUrl").value = url;
+
   localStorage.setItem("ashikaPlaylist",url);
 
-  status("Bangladesh: "+channels.length+" channels loaded.");
- } catch(e) {
-  status("Bangladesh playlist failed: "+e.message,true);
+  status(name+": "+channels.length+" channels loaded.");
+
+ }catch(e){
+  status(name+" failed: "+e.message,true);
  }
+}
+
+function loadBangladesh(){
+ loadQuickPlaylist(
+  BD_URL,
+  "Bangladesh",
+  "Bangladesh"
+ );
 }
 
 /* SAVED PLAYLISTS */
 
-function getSaved() {
- try {
-  return JSON.parse(localStorage.getItem("ashikaSaved")||"[]");
- } catch(e) {
+function getSaved(){
+ try{
+  return JSON.parse(
+   localStorage.getItem("ashikaSaved") || "[]"
+  );
+ }catch(e){
   return [];
  }
 }
 
-function refreshSaved() {
+function refreshSaved(){
  const list = getSaved();
  const select = $("savedPlaylists");
- select.innerHTML = '<option value="">Select a saved playlist</option>';
+
+ select.innerHTML =
+  '<option value="">Select a saved playlist</option>';
 
  list.forEach((p,index)=>{
   const option = document.createElement("option");
@@ -486,57 +1041,72 @@ function refreshSaved() {
  });
 }
 
-function savePlaylist() {
+function savePlaylist(){
  const name = $("playlistName").value.trim();
  const url = $("playlistUrl").value.trim();
 
- if(!name || !url) {
+ if(!name || !url){
   status("Enter both playlist name and URL.",true);
   return;
  }
 
  const list = getSaved();
- const index = list.findIndex(p=>p.name.toLowerCase()===name.toLowerCase());
 
- if(index>=0) list[index] = {name,url};
- else list.push({name,url});
+ const index = list.findIndex(
+  p=>p.name.toLowerCase()===name.toLowerCase()
+ );
 
- localStorage.setItem("ashikaSaved",JSON.stringify(list));
+ if(index>=0){
+  list[index] = {name,url};
+ }else{
+  list.push({name,url});
+ }
+
+ localStorage.setItem(
+  "ashikaSaved",
+  JSON.stringify(list)
+ );
+
  refreshSaved();
 
- $("savedPlaylists").value = index>=0 ? index : list.length-1;
+ $("savedPlaylists").value =
+  index>=0 ? index : list.length-1;
+
  $("playlistName").value = "";
 
  status("Playlist saved successfully.");
 }
 
-function loadSaved() {
+function loadSaved(){
  const index = $("savedPlaylists").value;
 
- if(index==="") {
+ if(index===""){
   status("Select a saved playlist first.",true);
   return;
  }
 
  const p = getSaved()[Number(index)];
- if(!p) {
+
+ if(!p){
   status("Saved playlist not found.",true);
   return;
  }
 
  $("playlistUrl").value = p.url;
 
- if(p.url.includes("/countries/bd.m3u")) {
-  loadBangladeshTry(p.url);
- } else {
+ if(p.url.includes("/countries/bd.m3u")){
+  loadQuickPlaylist(
+   p.url,"Bangladesh","Bangladesh"
+  );
+ }else{
   loadFromUrl(p.url);
  }
 }
 
-function deleteSaved() {
+function deleteSaved(){
  const index = $("savedPlaylists").value;
 
- if(index==="") {
+ if(index===""){
   status("Select a playlist to delete.",true);
   return;
  }
@@ -544,16 +1114,25 @@ function deleteSaved() {
  const list = getSaved();
  const removed = list.splice(Number(index),1);
 
- localStorage.setItem("ashikaSaved",JSON.stringify(list));
+ localStorage.setItem(
+  "ashikaSaved",
+  JSON.stringify(list)
+ );
+
  refreshSaved();
 
- status(removed.length ? removed[0].name+" deleted." : "Playlist not found.");
+ status(
+  removed.length
+   ? removed[0].name+" deleted."
+   : "Playlist not found."
+ );
 }
 
 /* UPLOAD FILE */
 
-function uploadFile(event) {
+function uploadFile(event){
  const file = event.target.files[0];
+
  if(!file) return;
 
  status("Reading uploaded playlist...");
@@ -561,92 +1140,124 @@ function uploadFile(event) {
  const reader = new FileReader();
 
  reader.onload = ()=>{
-  try {
+  try{
    const result = parseM3U(reader.result);
 
-   if(!result.length) throw new Error("No channels found in file.");
+   if(!result.length){
+    throw new Error("No channels found in file.");
+   }
 
    channels = result;
    shown = 60;
+   current = null;
+   indiaMode = "";
+
+   closePopupPlayer();
    updateFilters();
    render();
 
-   status("Uploaded successfully: "+channels.length+" channels.");
-  } catch(e) {
+   status(
+    "Uploaded successfully: "+
+    channels.length+" channels."
+   );
+
+  }catch(e){
    status("File error: "+e.message,true);
   }
  };
 
- reader.onerror = ()=>status("Could not read this file.",true);
+ reader.onerror = ()=>{
+  status("Could not read this file.",true);
+ };
+
  reader.readAsText(file);
 }
 
 /* EPG */
 
-function parseXML(xml) {
- const doc = new DOMParser().parseFromString(xml,"application/xml");
+function parseXML(xml){
+ const doc = new DOMParser().parseFromString(
+  xml,"application/xml"
+ );
 
- if(doc.querySelector("parsererror")) throw new Error("Invalid XMLTV file");
+ if(doc.querySelector("parsererror")){
+  throw new Error("Invalid XMLTV file");
+ }
 
  return [...doc.querySelectorAll("programme")].map(p=>({
   id:p.getAttribute("channel"),
   start:p.getAttribute("start"),
   stop:p.getAttribute("stop"),
-  title:p.querySelector("title")?.textContent||"Untitled",
-  desc:p.querySelector("desc")?.textContent||""
+  title:p.querySelector("title")?.textContent || "Untitled",
+  desc:p.querySelector("desc")?.textContent || ""
  }));
 }
 
-function xmlDate(value) {
+function xmlDate(value){
  if(!value) return null;
 
- const m = value.match(/^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})?/);
+ const m = value.match(
+  /^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})?/
+ );
 
  if(!m) return new Date(value);
 
  return new Date(Date.UTC(
-  Number(m[1]),Number(m[2])-1,Number(m[3]),
-  Number(m[4]),Number(m[5]),Number(m[6]||0)
+  Number(m[1]),
+  Number(m[2])-1,
+  Number(m[3]),
+  Number(m[4]),
+  Number(m[5]),
+  Number(m[6]||0)
  ));
 }
 
-async function loadEPG() {
+async function loadEPG(){
  const url = $("epgUrl").value.trim();
 
- if(!url) {
-  $("epgBox").textContent = "Please enter an XMLTV EPG URL.";
+ if(!url){
+  $("epgBox").textContent =
+   "Please enter an XMLTV EPG URL.";
   return;
  }
 
  $("epgBox").textContent = "Loading TV guide...";
 
- try {
+ try{
   const xml = await fetchText(url);
   epg = parseXML(xml);
 
-  if(!epg.length) throw new Error("No programme entries found.");
+  if(!epg.length){
+   throw new Error("No programme entries found.");
+  }
 
-  $("epgBox").textContent = "TV guide loaded: "+epg.length+" programmes.";
+  $("epgBox").textContent =
+   "TV guide loaded: "+epg.length+" programmes.";
 
   if(current) showEPG(current);
- } catch(e) {
-  $("epgBox").textContent = "EPG error: "+e.message;
+
+ }catch(e){
+  $("epgBox").textContent =
+   "EPG error: "+e.message;
  }
 }
 
-function showEPG(c) {
+function showEPG(c){
  const now = new Date();
 
  const matches = epg.filter(p=>
   (p.id===c.id || p.id===c.name) &&
   xmlDate(p.stop)>now
- ).sort((a,b)=>xmlDate(a.start)-xmlDate(b.start)).slice(0,5);
+ ).sort((a,b)=>
+  xmlDate(a.start)-xmlDate(b.start)
+ ).slice(0,5);
 
  const box = $("epgBox");
  box.innerHTML = "";
 
- if(!matches.length) {
-  box.textContent = "No matching programme data for this channel.";
+ if(!matches.length){
+  box.textContent =
+   "No matching programme data for this channel.";
   return;
  }
 
@@ -655,7 +1266,12 @@ function showEPG(c) {
   div.className = "program";
 
   const time = document.createElement("small");
-  time.textContent = xmlDate(p.start)?.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})||"";
+
+  time.textContent =
+   xmlDate(p.start)?.toLocaleTimeString(
+    [],
+    {hour:"2-digit",minute:"2-digit"}
+   ) || "";
 
   const title = document.createElement("strong");
   title.textContent = p.title;
@@ -677,11 +1293,41 @@ $("loadBtn").addEventListener("click",()=>{
 
 $("bdBtn").addEventListener("click",loadBangladesh);
 
+$("indiaAllBtn").addEventListener("click",()=>{
+ loadQuickPlaylist(
+  INDIA_URL,
+  "Indian Channels",
+  "India",
+  "india"
+ );
+});
+
+$("indiaEntertainmentBtn").addEventListener("click",()=>{
+ loadQuickPlaylist(
+  INDIA_URL,
+  "Indian Entertainment",
+  "India",
+  "entertainment"
+ );
+});
+
+$("indiaSportsBtn").addEventListener("click",()=>{
+ loadQuickPlaylist(
+  INDIA_URL,
+  "Indian Sports",
+  "India",
+  "sports"
+ );
+});
+
 $("saveBtn").addEventListener("click",savePlaylist);
 $("loadSavedBtn").addEventListener("click",loadSaved);
 $("deleteSavedBtn").addEventListener("click",deleteSaved);
 
-$("fileBtn").addEventListener("click",()=>$("fileInput").click());
+$("fileBtn").addEventListener("click",()=>{
+ $("fileInput").click();
+});
+
 $("fileInput").addEventListener("change",uploadFile);
 
 $("search").addEventListener("input",()=>{
@@ -725,14 +1371,24 @@ document.querySelectorAll(".tab").forEach(button=>{
 
 /* START */
 
-try {
+try{
  refreshSaved();
  updateFilters();
  render();
+
+ const lastPlaylist =
+  localStorage.getItem("ashikaPlaylist");
+
+ if(lastPlaylist){
+  $("playlistUrl").value = lastPlaylist;
+ }
+
  status("Ashika Live TV ready. Press Load Playlist.");
-} catch(e) {
+
+}catch(e){
  status("Website error: "+e.message,true);
 }
 </script>
+
 </body>
  </html>
